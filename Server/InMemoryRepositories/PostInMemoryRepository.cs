@@ -12,8 +12,17 @@ public class PostInMemoryRepository : IPostRepository
 {
     //This list acts as our "database table" for Posts
     private readonly List<Post> posts = new();
-    
-    
+
+    public PostInMemoryRepository()
+    {
+        SeedPosts();
+    }
+
+    private void SeedPosts()
+    {
+        posts.Add(new Post { Id = 1, Title = "Hello World", Body = "This is my first post!", UserId = 1 });
+        posts.Add(new Post { Id = 2, Title = "Second Post", Body = "Repository pattern is working!", UserId = 2 });
+    }
     /// <summary>
     /// Add a new Post. Sets a new Id and returns the created Post.
     /// </summary>

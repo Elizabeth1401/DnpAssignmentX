@@ -7,8 +7,18 @@ public class CommentInMemoryRepository : ICommentRepository
 {
     //This list acts as our "database table" for Comments
     private readonly List<Comment> comments = new();
-    
-    
+
+    public CommentInMemoryRepository()
+    {
+        SeedComments();
+    }
+
+    private void SeedComments()
+    {
+        comments.Add(new Comment { Id = 1, Body = "Nice post!", PostId = 1, UserId = 2 });
+        comments.Add(new Comment { Id = 2, Body = "Thanks for sharing!", PostId = 1, UserId = 3 });
+        comments.Add(new Comment { Id = 3, Body = "I agree with you.", PostId = 2, UserId = 1 });
+    }
     /// <summary>
     /// Add a new Comment. Sets a new Id and returns the created Comment.
     /// </summary>

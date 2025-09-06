@@ -7,8 +7,17 @@ public class UserInMemoryRepository : IUserRepository
 {
     //This list acts as our "database table" for Posts
     private readonly List<User> users = new();
-    
-    
+
+    public UserInMemoryRepository()
+    {
+        SeedUsers();
+    }
+    private void SeedUsers()
+    {
+        users.Add(new User {Id = 1, Username = "alice", Password = "pass123"});
+        users.Add(new User {Id = 2, Username = "bob", Password = "qwerty"});
+        users.Add(new User {Id = 3, Username = "charlie", Password = "123456"});
+    }
     /// <summary>
     /// Add a new User. Sets a new Id and returns the created User.
     /// </summary>
