@@ -87,10 +87,16 @@ Each repository interface defines **5 standard CRUD operations:**
 **In Memory Repository Inmlementation**
 
 
-![img_1.png](img_1.png)
+![img_1.png](img/img_1.png)
 
-![img.png](img.png)
+![img.png](img/img.png)
 
-![img_2.png](img_2.png)
+![img_2.png](img/img_2.png)
 
-![img_3.png](img_3.png)
+![img_3.png](img/img_3.png)
+
+**Dummy Data Initialization**
+
+To make testing easier, each in-memory repository (User, Comment, Post) comes preloaded with some sample data.
+
+This ensures the application has content right after startup, making it easier to test CRUD operations.
