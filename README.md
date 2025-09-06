@@ -83,3 +83,14 @@ Each repository interface defines **5 standard CRUD operations:**
 - *Task* = represents an operation that will eventually complete (but has no return value).
 - Methods are suffixed with *Async* by convertion (e.g., AddAsync).
 - This enables **asynchronous programming**, where different operations (e.g., read from a DB oe file) can run concurrently.
+
+**In Memory Repository Inmlementation**
+
+
+![img_1.png](img_1.png)
+
+![img.png](img.png)
+
+![img_2.png](img_2.png)
+
+![img_3.png](img_3.png)
