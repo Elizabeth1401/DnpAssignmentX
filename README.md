@@ -190,6 +190,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **Constructor** 
+
+
 ![img.png](img/img_5.png)
 
 **What it does**
@@ -212,6 +214,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **AddAsync(T entity)**
+
+
 ![img_4.png](img/img_4.png)
 
 **What it does**
@@ -240,6 +244,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **UpdateAsync(T entity)**
+
+
 ![img_6.png](img/img_6.png)
 
 **What it does**
@@ -264,6 +270,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **DeleteAsync(int id)**
+
+
 ![img.png](img/img_7.png)
 
 **What it does**
@@ -288,6 +296,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **GetSingleAsync(int id)**
+
+
 ![img.png](img/img_8.png)
 
 **What it does**
@@ -306,6 +316,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **GetMany() (non-async)**
+
+
 ![img.png](img/img_9.png)
 
 **What it does**
@@ -330,6 +342,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **LoadAllAsync() (private helper)**
+
+
 ![img.png](img/img_10.png)
 
 **What it does**
@@ -346,6 +360,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **SaveAllAsync() (private helper)**
+
+
 ![img.png](img/img_11.png)
 
 **What it does**
@@ -362,6 +378,8 @@ Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAl
 
 ---
 **SeedIfEmptyAsync() (private helper)**
+
+
 ![img.png](img/img_12.png)
 
 **What it does**
