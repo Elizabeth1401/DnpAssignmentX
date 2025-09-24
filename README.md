@@ -176,3 +176,200 @@ The main goals were to practice:
 This follows **Single Responsibility Principle (SRP)** from SOLID
 
 ---
+## File Repository – Method Explanations
+
+Each repo also has some private helpers (constructor setup, LoadAllAsync, SaveAllAsync, and SeedIfEmptyAsync) and a SemaphoreSlim to avoid concurrent write collisions.
+
+- System.Text.Json for serialization
+
+- File.ReadAllTextAsync / WriteAllTextAsync for async I/O
+
+- SemaphoreSlim to serialize writes
+
+- AppContext.BaseDirectory + Data/ as storage location
+
+---
+**Constructor** 
+![img.png](img/img_5.png)
+
+**What it does**
+
+1. **Ensures storage exists:** Creates the Data/ folder if missing.
+
+2. **Ensures file exists:** Creates xxx.json with an empty JSON array [ ] if missing.
+
+3. **Seeds data (optional requirement):** If the list is empty, writes initial dummy entities.
+
+**Why**
+
+- So the repository is safe to use immediately, without manual setup.
+
+- Seeding gives you realistic data for testing and demos.
+
+**Pitfalls covered**
+
+- Repeated runs are idempotent: CreateDirectory and the existence check won’t break anything.
+
+---
+**AddAsync(T entity)**
+![img_4.png](img/img_4.png)
+
+**What it does**
+
+1. **Locks** to prevent concurrent writers from stepping on each other.
+
+2. **Loads** the entire list from the file.
+
+3. **Generates a new Id** as maxId + 1 (or 1 if empty).
+
+4. **Adds** the entity to the list.
+
+5. **Saves** the entire list back to disk.
+
+**Why**
+
+- File storage isn’t transactional; we serialize the whole collection atomically.
+
+- Assigning IDs in the repository keeps UI simple.
+
+**Edge cases**
+
+- If items were deleted, IDs aren’t reused (common and OK).
+
+- If two threads add simultaneously, SemaphoreSlim prevents ID collisions.
+
+---
+**UpdateAsync(T entity)**
+![img_6.png](img/img_6.png)
+
+**What it does**
+
+1. **Locks** writes.
+
+2. **Loads** the full list.
+
+3. **Finds** the entity by Id.
+
+4. **Overwrites** the entity in place.
+
+5. **Saves** back to the file.
+
+**Why**
+
+- Simple, clear semantics: full read → modify in memory → full write.
+
+**Edge cases**
+
+- Missing entity: we silently return (or you can throw). Decide and document behavior.
+
+---
+**DeleteAsync(int id)**
+![img.png](img/img_7.png)
+
+**What it does**
+
+1. **Locks** writes.
+
+2. **Loads** list.
+
+3. **Removes** all items with matching Id.
+
+4. **Saves** list.
+
+**Why**
+
+- Full overwrite keeps the on-disk file consistent.
+
+- RemoveAll handles duplicates defensively (there shouldn’t be any).
+
+**Edge cases**
+
+- Deleting a non-existing id is a no-op (or throw; your choice).
+
+---
+**GetSingleAsync(int id)**
+![img.png](img/img_8.png)
+
+**What it does**
+
+1. **Loads** the list (async).
+
+2. **Returns** the first item with that Id, or null.
+
+**Why**
+
+- Read operations can avoid locking since we’re not mutating, and file reads are atomic per call.
+
+**Edge cases**
+
+- null return means “not found” (UI can decide how to report).
+
+---
+**GetMany() (non-async)**
+![img.png](img/img_9.png)
+
+**What it does**
+
+1. **Synchronously** unwraps ReadAllTextAsync using .Result.
+
+2. **Deserializes** the JSON to a list.
+
+3. **Returns** an IQueryable<T> over the in-memory list.
+
+**Why the “cheat”**
+
+- The interface requires a **non-async** method returning IQueryable<T>.
+
+- We can’t await here, so we use .Result exactly as the teacher advised.
+
+**Caveats (good to mention in exam)**
+
+- .Result can deadlock in ASP.NET contexts; okay in a simple console app.
+
+- If we later switch to EF Core, IQueryable will be backed by the DB provider and translated to SQL; our UI code remains unchanged.
+
+---
+**LoadAllAsync() (private helper)**
+![img.png](img/img_10.png)
+
+**What it does**
+
+- Reads the entire file asynchronously and deserializes it to a List<T>.
+
+**Why**
+
+- Centralizes deserialization and default handling (?? new()).
+
+**Edge cases**
+
+- If the file is empty/corrupt, you might add try/catch → return empty list or rethrow.
+
+---
+**SaveAllAsync() (private helper)**
+![img.png](img/img_11.png)
+
+**What it does**
+
+- Serializes the whole list and writes it back to the file asynchronously.
+
+**Why**
+
+- Keeps file state in sync with memory changes.
+
+**Edge cases**
+
+- Consider handling IO exceptions if you want robust error messages.
+
+---
+**SeedIfEmptyAsync() (private helper)**
+![img.png](img/img_12.png)
+
+**What it does**
+
+- If the file contains [] or nothing, writes a few initial entities.
+
+**Why**
+
+- Makes the app usable immediately (test listing/reading without manual creation).
+
+---

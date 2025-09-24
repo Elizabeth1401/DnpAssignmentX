@@ -15,24 +15,25 @@ public class UserFileRepository : IUserRepository
 
     public UserFileRepository(string? fileName = null)
     {
-        Directory.CreateDirectory(_dir);
+        Directory.CreateDirectory(_dir); //Ensure Data/ exists
         _filePath = Path.Combine(_dir, fileName ?? "users.json");
-        if (!File.Exists(_filePath)) File.WriteAllText(_filePath, "[]");
-        SeedIfEmptyAsync().GetAwaiter().GetResult();
+        if (!File.Exists(_filePath)) //Ensure the JSON file exists
+            File.WriteAllText(_filePath, "[]");
+        SeedIfEmptyAsync().GetAwaiter().GetResult(); //Optional: add dummy data on first run
     }
 
     public async Task<User> AddAsync(User user)
     {
-        await _gate.WaitAsync();
+        await _gate.WaitAsync(); //acquire write lock
         try
         {
-            var list = await LoadAllAsync();
-            user.Id = list.Count == 0 ? 1 : list.Max(u => u.Id) + 1;
-            list.Add(user);
-            await SaveAllAsync(list);
-            return user;
+            var list = await LoadAllAsync(); //read & deserialize full list
+            user.Id = list.Count == 0 ? 1 : list.Max(u => u.Id) + 1; //next id
+            list.Add(user); //mutate list in memory
+            await SaveAllAsync(list); //serialize & write back
+            return user; //return with assigned id
         }
-        finally { _gate.Release(); }
+        finally { _gate.Release(); } //release write lock
     }
 
     public async Task UpdateAsync(User user)
@@ -42,8 +43,8 @@ public class UserFileRepository : IUserRepository
         {
             var list = await LoadAllAsync();
             var idx = list.FindIndex(u => u.Id == user.Id);
-            if (idx < 0) return;
-            list[idx] = user;
+            if (idx < 0) return; //or throw KeyNotFoundException
+            list[idx] = user; //overwrite the item
             await SaveAllAsync(list);
         }
         finally { _gate.Release(); }
@@ -55,7 +56,7 @@ public class UserFileRepository : IUserRepository
         try
         {
             var list = await LoadAllAsync();
-            list.RemoveAll(u => u.Id == id);
+            list.RemoveAll(u => u.Id == id); //remove zero or more matches
             await SaveAllAsync(list);
         }
         finally { _gate.Release(); }
@@ -72,7 +73,7 @@ public class UserFileRepository : IUserRepository
     // In a console app this is acceptable, but generally prefer await.
     public IQueryable<User> GetMany()
     {
-        string json = File.ReadAllTextAsync(_filePath).Result;
+        string json = File.ReadAllTextAsync(_filePath).Result; //sync unwrap
         var list = JsonSerializer.Deserialize<List<User>>(json, JsonOpts) ?? new();
         return list.AsQueryable();
     }
