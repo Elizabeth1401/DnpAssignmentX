@@ -34,6 +34,27 @@ public class UserFileRepository : IUserRepository
         SeedIfEmptyAsync().GetAwaiter().GetResult(); //Optional: add dummy data on first run
     }
 
+    public async Task<bool> DoesUsernameExistAsync(string username)
+    {
+        await _gate.WaitAsync(); //acquire write lock
+        try
+        {
+            var allUsers = await LoadAllAsync(); //read & deserialize full list
+            foreach (var currentUser in allUsers)
+            {
+                if (currentUser.Username == username)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        finally
+        {
+            _gate.Release();
+        } //release write lock
+    }
     public async Task<User> AddAsync(User user)
     {
         await _gate.WaitAsync(); //acquire write lock
@@ -48,6 +69,28 @@ public class UserFileRepository : IUserRepository
         finally { _gate.Release(); } //release write lock
     }
 
+    public async Task<User> PatchAsync(int id, string password)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var list = await LoadAllAsync();
+            var idx = list.FindIndex(u => u.Id == id);
+            if (idx == -1)
+            {
+                return null;
+            }
+            list[idx].Password = password;
+            await SaveAllAsync(list);
+            return list[idx];
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
     public async Task UpdateAsync(User user)
     {
         await _gate.WaitAsync();

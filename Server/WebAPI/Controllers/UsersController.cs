@@ -20,16 +20,24 @@ public class UsersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<UserDTO>>> GetUsers()
     {
-        var users = _userRepository.GetMany();
+        var users =  _userRepository.GetMany();
         if (!users.Any())
             return NotFound();
         return Ok(users);
     }
-    
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserDTO>> GetUser(int id)
+    {
+        var user = await _userRepository.GetSingleAsync(id);
+        if (user == null)
+            return NotFound();
+        return Ok(user);
+    }
     [HttpPost]
     public async Task<ActionResult<UserDTO>> AddUser([FromBody] CreateUserDto request)
     {
-        await VerifyUserNameIsAvailableAsync(request.Username);
+        await _userRepository.DoesUsernameExistAsync(request.Username);
 
         User user = new(request.Username, request.Password);
         await _userRepository.AddAsync(user);
@@ -46,14 +54,15 @@ public class UsersController : ControllerBase
         }
         return Ok(deleteUser);
     }
-    private async Task VerifyUserNameIsAvailableAsync(string userName)
+
+    [HttpPatch]
+    public async Task<ActionResult<UserDTO>> UpdateUser([FromBody] string password, int id)
     {
-       var currentUsersInTheDatabase = _userRepository.GetMany();
-       foreach (var currentUser in currentUsersInTheDatabase)
-       { if (currentUser.Username == userName)
-               {
-                  throw new InvalidOperationException($"User {userName} already exists");
-               }
-       }
+        var updatedUser = await _userRepository.PatchAsync(id, password);
+        if (updatedUser == null)
+            {
+            return NotFound($"User with id {id} not found");
+            }
+        return Ok(updatedUser);
     }
 }

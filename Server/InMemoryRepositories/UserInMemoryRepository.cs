@@ -94,4 +94,14 @@ public class UserInMemoryRepository : IUserRepository
     {
         return users.AsQueryable();
     }
+
+    public Task<bool> DoesUsernameExistAsync(string username)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<User> PatchAsync(int id, string password)
+    {
+        throw new NotImplementedException();
+    }
 }
