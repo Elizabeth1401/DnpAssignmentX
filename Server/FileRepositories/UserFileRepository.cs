@@ -9,9 +9,21 @@ namespace FileRepositories;
 public class UserFileRepository : IUserRepository
 {
     private static readonly JsonSerializerOptions JsonOpts = new() { WriteIndented = true };
+    //JsonSerializerOptions → configuration object for System.Text.Json.
+    // 
+    // WriteIndented = true → makes your JSON file formatted with line breaks and spaces instead of one long line.
     private readonly string _dir = Path.Combine(AppContext.BaseDirectory, "Data");
     private readonly string _filePath;
     private readonly SemaphoreSlim _gate = new(1, 1);
+    //This is a thread-safety lock that ensures only one operation (read or write) accesses the file at a time.
+    // 
+    // SemaphoreSlim → lightweight synchronization tool.
+    // 
+    // The two 1 values mean:
+    // 
+    // initialCount = 1 → one thread allowed at a time.
+    // 
+    // maxCount = 1 → maximum one thread.
 
     public UserFileRepository(string? fileName = null)
     {
@@ -50,14 +62,20 @@ public class UserFileRepository : IUserRepository
         finally { _gate.Release(); }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<User?> DeleteAsync(int id)
     {
         await _gate.WaitAsync();
         try
         {
             var list = await LoadAllAsync();
-            list.RemoveAll(u => u.Id == id); //remove zero or more matches
+            
+            var userToDelete = list.FirstOrDefault(u => u.Id == id);
+            if (userToDelete == null) { return null; }
+            
+            list.Remove(userToDelete);
             await SaveAllAsync(list);
+            return userToDelete;
+            
         }
         finally { _gate.Release(); }
     }

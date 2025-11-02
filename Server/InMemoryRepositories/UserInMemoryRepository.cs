@@ -57,7 +57,7 @@ public class UserInMemoryRepository : IUserRepository
     /// <summary>
     /// Delete a PUser by Id. Throws exception if not found.
     /// </summary>
-    public Task DeleteAsync(int id)
+    public Task<User> DeleteAsync(int id)
     {
         User? userToRemove = users.SingleOrDefault(p => p.Id == id);
         if (userToRemove == null)
@@ -67,7 +67,7 @@ public class UserInMemoryRepository : IUserRepository
         }
 
         users.Remove(userToRemove);
-        return Task.CompletedTask;
+        return Task.CompletedTask as Task<User>;
     }
 
     
