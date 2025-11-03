@@ -8,4 +8,11 @@ public class Post
     
     //Foreign key to User
     public int UserId { get; set; }
+    
+    public Post(){}
+    public Post(string title, string body)
+        {
+        Title = title;
+        Body = body;
+        }
 }

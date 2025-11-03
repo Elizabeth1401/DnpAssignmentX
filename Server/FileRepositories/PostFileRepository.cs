@@ -49,14 +49,18 @@ public class PostFileRepository : IPostRepository
         finally { _gate.Release(); }
     }
     
-    public async Task DeleteAsync(int id)
+    public async Task<Post?> DeleteAsync(int id)
     {
         await _gate.WaitAsync();
         try
         {
             var list = await LoadAllAsync();
-            list.RemoveAll(p => p.Id == id);
+            var postToDelete = list.FirstOrDefault(u => u.Id == id);
+            if (postToDelete == null) { return null; }
+            
+            list.Remove(postToDelete);
             await SaveAllAsync(list);
+            return postToDelete;
         }
         finally { _gate.Release(); }
     }
@@ -74,6 +78,46 @@ public class PostFileRepository : IPostRepository
         return list.AsQueryable();
     }
 
+    public async Task<bool> DoesPostExistAsync(string Title)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var allPosts = await LoadAllAsync();
+            foreach (var currentPost in allPosts)
+            {
+                if (currentPost.Title == Title) return true;
+            }
+
+            return false;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    public async Task<Post> PatchAsync(int id, string title)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var list = await LoadAllAsync();
+            var idx = list.FindIndex(u => u.Id == id);
+            if (idx == -1)
+            {
+                return null;
+            }
+            list[idx].Title = title;
+            await SaveAllAsync(list);
+            return list[idx];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
     private async Task<List<Post>> LoadAllAsync()
     {
         string json = await File.ReadAllTextAsync(_filePath);

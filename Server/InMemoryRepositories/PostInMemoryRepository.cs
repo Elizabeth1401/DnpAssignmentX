@@ -62,7 +62,7 @@ public class PostInMemoryRepository : IPostRepository
     /// <summary>
     /// Delete a Post by Id. Throws exception if not found.
     /// </summary>
-    public Task DeleteAsync(int id)
+    public Task<Post> DeleteAsync(int id)
     {
         Post? postToRemove = posts.SingleOrDefault(p => p.Id == id);
         if (postToRemove == null)
@@ -72,7 +72,7 @@ public class PostInMemoryRepository : IPostRepository
         }
 
         posts.Remove(postToRemove);
-        return Task.CompletedTask;
+        return Task.CompletedTask as Task<Post>;
     }
 
     
@@ -98,5 +98,15 @@ public class PostInMemoryRepository : IPostRepository
     public IQueryable<Post> GetMany()
     {
         return posts.AsQueryable();
+    }
+
+    public Task<bool> DoesPostExistAsync(string Body)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Post> PatchAsync(int id, string title)
+    {
+        throw new NotImplementedException();
     }
 }

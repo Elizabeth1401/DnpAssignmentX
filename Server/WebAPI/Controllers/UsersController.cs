@@ -60,9 +60,9 @@ public class UsersController : ControllerBase
     {
         var updatedUser = await _userRepository.PatchAsync(id, password);
         if (updatedUser == null)
-            {
+        {
             return NotFound($"User with id {id} not found");
-            }
+        }
         return Ok(updatedUser);
     }
 }
