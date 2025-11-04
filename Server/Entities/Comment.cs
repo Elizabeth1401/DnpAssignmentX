@@ -7,5 +7,13 @@ public class Comment
     
     //Foreign keys
     public int UserId { get; set; } // author of the comment
-    public int PostId { get; set; } // the post this comment belongs to 
+    public int PostId { get; set; } // the post this comment belongs to
+    
+    public Comment(){}
+
+    public Comment(int id, string body)
+    {
+        Id = id;
+        Body = body;
+    }
 }

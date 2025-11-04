@@ -48,16 +48,42 @@ public class CommentFileRepository : ICommentRepository
         finally { _gate.Release(); }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task<Comment?> DeleteAsync(int id)
     {
         await _gate.WaitAsync();
         try
         {
             var list = await LoadAllAsync();
-            list.RemoveAll(c => c.Id == id);
+            var commentToDelete = list.FirstOrDefault(u => u.Id == id);
+            if (commentToDelete == null) { return null; }
+            
+            list.Remove(commentToDelete);
             await SaveAllAsync(list);
+            return commentToDelete;
         }
         finally { _gate.Release(); }
+    }
+
+    public async Task<Comment> PatchAsync(int id, string body)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var list = await LoadAllAsync();
+            var idx = list.FindIndex(u => u.Id == id);
+            if (idx == -1)
+            {
+                return null;
+            }
+            list[idx].Body = body;
+            await SaveAllAsync(list);
+            return list[idx];
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task<Comment?> GetSingleAsync(int id)
@@ -76,6 +102,21 @@ public class CommentFileRepository : ICommentRepository
         return list.AsQueryable();
     }
 
+    public async Task<bool> DoesCommentExistAsync(string body)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var allComments = await LoadAllAsync();
+            foreach (var currentComment in allComments)
+            {
+                if (currentComment.Body == body) return true;
+            }
+            return false;
+        }
+        finally { _gate.Release(); }
+    }
+    
     private async Task<List<Comment>> LoadAllAsync()
     {
         string json = await File.ReadAllTextAsync(_filePath);
@@ -87,7 +128,7 @@ public class CommentFileRepository : ICommentRepository
         string json = JsonSerializer.Serialize(list, JsonOpts);
         return File.WriteAllTextAsync(_filePath, json);
     }
-
+    
     private async Task SeedIfEmptyAsync()
     {
         var list = await LoadAllAsync();

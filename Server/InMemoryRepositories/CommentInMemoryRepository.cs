@@ -58,7 +58,7 @@ public class CommentInMemoryRepository : ICommentRepository
     /// <summary>
     /// Delete a Comment by Id. Throws exception if not found.
     /// </summary>
-    public Task DeleteAsync(int id)
+    public Task<Comment> DeleteAsync(int id)
     {
         Comment? commentToRemove = comments.SingleOrDefault(p => p.Id == id);
         if (commentToRemove == null)
@@ -68,7 +68,7 @@ public class CommentInMemoryRepository : ICommentRepository
         }
 
         comments.Remove(commentToRemove);
-        return Task.CompletedTask;
+        return Task.CompletedTask as Task<Comment>;
     }
 
     
@@ -94,5 +94,15 @@ public class CommentInMemoryRepository : ICommentRepository
     public IQueryable<Comment> GetMany()
     {
         return comments.AsQueryable();
+    }
+
+    public Task<bool> DoesCommentExistAsync(string body)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Comment> PatchAsync(int id, string body)
+    {
+        throw new NotImplementedException();
     }
 }
