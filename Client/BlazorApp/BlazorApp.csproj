@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Server\WebAPI\WebAPI.csproj" />
       <ProjectReference Include="..\..\Shared\ApiContracts\ApiContracts.csproj" />
     </ItemGroup>
 

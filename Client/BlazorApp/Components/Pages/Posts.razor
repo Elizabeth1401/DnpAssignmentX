@@ -1,0 +1,124 @@
+@page "/"
+@inject HttpClient Http
+@using System.Net.Http.Json
+@using ApiContracts.DTOs
+@using Entities
+<h3>Create a new post</h3>
+<div style="display:flex; flex-direction: column; width: 250px; gap: 10px;">
+    <label>
+        Title
+        <input @bind="title" />
+    </label>
+    
+    <label>
+        Body
+        <input @bind="body" />
+    </label>
+    
+    <label>
+        Author
+        <select @onclick="LoadAllUsers" @bind="userId">
+            @foreach (var user in allUsers)
+            {
+                <option value="@user.Id">@user.Username</option>
+            }
+        </select>
+        
+    </label>
+    
+    <button @onclick="CreateNewPost">
+        Enter
+    </button>
+</div>
+<p style="color: @messageColor">@message</p>
+<h3>Posts</h3>
+<div style="display: flex; flex-direction: column; gap: 20px;">
+    @foreach (var post in posts)
+    {
+        User user = usersByIdThatCreatedPosts.GetValueOrDefault(post.UserId);
+        
+        <div style="border: 1px solid #ccc; padding: 15px; border-radius: 6px;">
+            <div style="cursor: pointer; font-weight: bold;" @onclick="@(() => TogglePost(post))"><h4>@post.Title</h4></div>
+            @if (post.IsOpen)
+            {
+                <div>
+                    <p>@post.Body</p>
+                    <small>
+                        Author: @user.Username <br/>
+                    </small>
+                </div>
+            }
+           
+        </div>
+    }
+</div>
+@code {
+    private string title = "";
+    private string body = "";
+    private int userId;
+    private List<User> allUsers = new List<User>();
+    
+    private string message = "";
+    private string messageColor = "";
+    
+    
+    private async void CreateNewPost()
+    {
+        var data = new CreatePostDTO()
+        {
+            Title = title,
+            Body = body,
+            UserId = userId
+        };
+        var response = await Http.PostAsJsonAsync("http://localhost:5219/Posts", data);
+        if (response.IsSuccessStatusCode)
+        {
+            posts.Add(new Post(title, body, userId));
+            usersByIdThatCreatedPosts.Add(userId, allUsers.Where(user => user.Id == userId).First());
+            title = "";
+            body = "";
+            userId = 0;
+            StateHasChanged();
+        }
+        
+    }
+    
+    private async void LoadAllUsers()
+    {
+        allUsers = await Http.GetFromJsonAsync <List<User>>("http://localhost:5219/Users");
+    }
+    
+    
+    
+    
+    
+    
+    private List<Post>? posts = new List<Post>();
+    private Dictionary<int, User> usersByIdThatCreatedPosts = new Dictionary<int, User>();
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await Http.GetFromJsonAsync<List<Post>>(
+            "http://localhost:5219/Posts");
+        var userIds = posts.Select(post => post.UserId).Distinct().ToList();
+
+        foreach (var id in userIds)
+        {
+            var user = await Http.GetFromJsonAsync<User>(
+                $"http://localhost:5219/Users/{id}");
+
+            if (user is not null)
+            {
+                usersByIdThatCreatedPosts[id] = user;
+            }
+        }
+    }
+
+    private void TogglePost(Post post)
+    {
+        post.IsOpen = !post.IsOpen;
+    }
+
+
+   
+
+}

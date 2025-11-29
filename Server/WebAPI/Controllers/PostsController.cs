@@ -47,7 +47,7 @@ public class PostsController : ControllerBase
             return Conflict(new { message = "A post with this title already exists." });
         }
 
-        Post post = new(request.Title, request.Body);
+        Post post = new(request.Title, request.Body, request.UserId);
         await _postRepository.AddAsync(post);
 
         return Created(string.Empty, new PostDTO(post));

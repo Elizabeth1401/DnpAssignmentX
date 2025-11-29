@@ -37,7 +37,11 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDTO>> AddUser([FromBody] CreateUserDto request)
     {
-        await _userRepository.DoesUsernameExistAsync(request.Username);
+       bool userExist =  await _userRepository.DoesUsernameExistAsync(request.Username);
+       if (!userExist)
+       {
+           return Conflict("Username already exist");
+       }
 
         User user = new(request.Username, request.Password);
         await _userRepository.AddAsync(user);

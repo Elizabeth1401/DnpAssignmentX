@@ -1,0 +1,51 @@
+@page "/users"
+@using ApiContracts.DTOs
+@inject HttpClient Http
+<h3>Input your user</h3>
+<div style="display:flex; flex-direction: column; width: 250px; gap: 10px;">
+    <label>
+        Username
+        <input @bind="username" />
+    </label>
+    
+    <label>
+        Password
+        <input @bind="password" type="password"/>
+    </label>
+    
+    <button @onclick="CreateNewUser">
+        Enter
+    </button>
+</div>
+<p style="color: @messageColor">@message</p>
+@code {
+    private string username = "";
+    private string password = "";
+
+    private string message = "";
+    private string messageColor = "";
+    
+    private async Task CreateNewUser()
+    {
+        var data = new CreateUserDto()
+        {
+            Username = username,
+            Password = password
+        };
+        var response = await Http.PostAsJsonAsync("http://localhost:5219/Users", data);
+        if (response.IsSuccessStatusCode)
+        {
+            message = "User has been added!";
+            messageColor = "green";
+        }
+        else
+        {
+            message = "Username already exists";
+            messageColor = "red";
+        }
+    }
+    
+    
+    
+    
+}

@@ -44,11 +44,11 @@ public class UserFileRepository : IUserRepository
             {
                 if (currentUser.Username == username)
                 {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
         finally
         {
