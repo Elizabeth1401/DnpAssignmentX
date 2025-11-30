@@ -43,7 +43,7 @@ public class CommentsController : ControllerBase
     {
         await _commentRepository.DoesCommentExistAsync(request.Body);
 
-        Comment comment = new(request.Id, request.Body);
+        Comment comment = new( request.Body, request.UserId, request.PostId);
         await _commentRepository.AddAsync(comment);
         return Created();
     }

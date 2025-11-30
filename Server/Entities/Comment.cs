@@ -11,9 +11,10 @@ public class Comment
     
     public Comment(){}
 
-    public Comment(int id, string body)
+    public Comment( string body, int userId, int postId)
     {
-        Id = id;
         Body = body;
+        UserId = userId;
+        PostId = postId;
     }
 }

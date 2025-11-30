@@ -1,6 +1,7 @@
 @page "/users"
 @using ApiContracts.DTOs
-@inject HttpClient Http
+@using BlazorApp.Services
+@inject IUserService userService
 <h3>Input your user</h3>
 <div style="display:flex; flex-direction: column; width: 250px; gap: 10px;">
     <label>
@@ -32,17 +33,19 @@
             Username = username,
             Password = password
         };
-        var response = await Http.PostAsJsonAsync("http://localhost:5219/Users", data);
-        if (response.IsSuccessStatusCode)
+        try
         {
+            await userService.AddUserAsync(data);
             message = "User has been added!";
             messageColor = "green";
         }
-        else
+        catch (Exception e)
         {
             message = "Username already exists";
             messageColor = "red";
         }
+     
+       
     }
     
     
